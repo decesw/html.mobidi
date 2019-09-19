@@ -1,0 +1,249 @@
+﻿<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	
+	<style>	
+        .split, .key {
+            color:navy;
+        }
+        .value {
+        }
+		#fill-mode-container {
+			display:none;
+		}
+		#result-json, #result-formatted {
+			font-size : 10pt;
+			border:1px solid lightgray;
+			border-top:none;
+			padding:10px;
+		}
+		#result-container {
+			display:none;
+		}
+	
+	</style>
+	<script>
+		function json2html(json) {
+			var i, ret = "";
+			ret += "<ul>";
+			for (i in json) {
+				ret += "<li><span class=key>" + i + "</span>";
+				if (typeof json[i] === "object") ret += json2html(json[i]);
+				else ret += "<span class=split>:</span> <span class=value>" + json[i] + "</span>";
+				ret += "</li>";
+			}
+			ret += "</ul>";
+			return ret;
+		}			
+	</script>
+</head>
+<body>
+	<div class="container">
+		<br/>
+		<nav id="main-tabs">
+		  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+			<a class="nav-item nav-link active" id="nav-query-record-counts-tab" data-toggle="tab" href="#nav-query-record-counts" role="tab" aria-controls="nav-query-record-counts" aria-selected="true">Query Record Counts</a>
+			<a class="nav-item nav-link" id="nav-query-records-tab" data-toggle="tab" href="#nav-query-records" role="tab" aria-controls="nav-query-records" aria-selected="false">Query Records</a>
+			<a class="nav-item nav-link" id="nav-create-record-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Create Record</a>
+		  </div>
+		</nav>
+		<div class="tab-content">
+		  <div class="tab-pane fade show active" id="nav-query-record-counts" role="tabpanel" aria-labelledby="nav-query-record-counts-tab">
+			<br/>
+			<p>This example demonstrates how to run a query and get related record counts for each layer. </p>
+			<p>The example gets first 10 records (endIndex) without any filter. To filter records, please use query object's related properties. <a href="https://servis2.dece.com.tr/DeceSystemInfoWebHandler?op=ObjectInfo&Name=Mobidi.Cloud.Intefaces.MobidiQuery,%20Mobidi.Cloud&PropEx=&loginWithGuest=1" target="_blank">Click</a> for MobidiQuery object properties.</p>
+		  </div>
+		  <div class="tab-pane fade" id="nav-query-records" role="tabpanel" aria-labelledby="nav-query-records-tab">
+			<br/>
+			<p>This example demonstrates how to run a query and get related records.</p>
+			<p>By default this service returns limited properties of the record for performance reasons.</p>
+			<p>You may set FillMode property according to required details. <a href="https://servis2.dece.com.tr/DeceSystemInfoWebHandler?op=ObjectInfo&Name=Mobidi.Cloud.Intefaces.MobidiQueryFillMode,%20Mobidi.Cloud&PropEx=FillMode&loginWithGuest=1" target="blank">Click</a> for other FillMode options.</p>
+		  </div>
+		  <div class="tab-pane fade" id="nav-create-record" role="tabpanel" aria-labelledby="nav-create-record-tab">...</div>
+		</div>
+		<hr/>
+		<div class="card">
+			<div class="card-body">
+				<form id="mainForm" class="needs-validation" novalidate>
+					<div class="form-group">
+						<label for="txtServerURL">Mobidi Office URL</label>
+						<input type="text" class="form-control" id="txtServerURL" aria-describedby="serverURLHelp" required>
+						<div class="invalid-feedback">
+						  Please write Mobidi Office URL.
+						</div>
+						<small id="serverURLHelp" class="form-text text-muted">Enter root URL of Mobidi Office (ex:http://mobidi.yourcompany.com, http://69.89.31.226)</small>
+					</div>
+					<div class="form-group">
+						<label for="txtToken">Token</label>
+						<input type="text" class="form-control" id="txtToken" aria-describedby="tokenHelp" required>
+						<div class="invalid-feedback">
+						  Please write Mobidi Office Token.
+						</div>
+						<small id="tokenHelp" class="form-text text-muted">You need to have a token to use Mobidi Office API's. System Manager can generate a token.</small>
+					</div>					
+					<div id="fill-mode-container" class="form-group">
+						<label class="form-check-label" for="fill-mode-card">Fill Mode</label>
+						<div class="card">
+							<div class="card-body">
+								<div class="form-check">
+									<input type="checkbox" class="form-check-input" id="fill-mode-attributes">
+									<label class="form-check-label" for="fill-mode-attributes">Attributes</label>
+								</div>
+								<div class="form-check">
+									<input type="checkbox" class="form-check-input" id="fill-mode-attachments">
+									<label class="form-check-label" for="fill-mode-attachments">Attachments</label>
+								</div>
+								<div class="form-check">
+									<input type="checkbox" class="form-check-input" id="fill-mode-geometry">
+									<label class="form-check-label" for="fill-mode-geometry">Geometry</label>
+								</div>
+							</div>
+						</div>
+					</div>					
+					<button type="button" id="run-button" class="btn btn-primary" onclick="run()">Run</button>
+				</form>
+				<br/>
+				<div id="result-container">
+					<nav id="main-tabs">
+					  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+						<a class="nav-item nav-link active" id="nav-result-formatted-tab" data-toggle="tab" href="#nav-result-formatted" role="tab" aria-controls="nav-result-formatted" aria-selected="false">Result - Formatted</a>
+						<a class="nav-item nav-link" id="nav-result-json-tab" data-toggle="tab" href="#nav-result-json" role="tab" aria-controls="nav-result-json" aria-selected="true">Result - JSON</a>
+					  </div>
+					</nav>
+					<div class="tab-content">
+						<div class="tab-pane fade show active" id="nav-result-formatted" role="tabpanel" aria-labelledby="nav-result-formatted-tab">
+							<div id='result-formatted'></div>
+						</div>
+						<div class="tab-pane fade" id="nav-result-json" role="tabpanel" aria-labelledby="nav-result-json-tab">
+							<div id="result-json"></div>
+						</div>
+					</div>				
+				</div>
+			</div>
+		</div>
+	</div>
+    <script>
+	
+        function guid() {
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+              s4() + '-' + s4() + s4() + s4();
+        }
+
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+              .toString(16)
+              .substring(1);
+        }	
+	
+		function validateForm() {
+			var form = document.getElementById('mainForm');
+			form.classList.add('was-validated');
+			return form.checkValidity();
+		}
+        function callService(op, postData, callBackFunction) {
+			var serviceURL = window.mobidiURL + '/MobidiQueryManagerHandler?op=' + op;
+			serviceURL += '&UserSession=' + window.token;
+			$.ajax({
+				method: "POST",
+				url: serviceURL,
+				dataType : 'json',
+				data: postData
+			})
+			.done(function( result ) {
+				callBackFunction(result);
+			});
+        };
+		function run() {
+			if (!validateForm())
+				return;
+			window.token = $('#txtToken').val();
+			window.mobidiURL = $('#txtServerURL').val();
+				
+			$('#result-formatted').html('');
+			$('#result-json').html('');				
+			$('#result-container').show();
+			var activeTabIndex = $('#main-tabs .nav-item').index($('#main-tabs .nav-item.active'));
+            var query = {
+                recordID : '',
+                startIndex : 0,
+                endIndex : 10,
+                startDate : '',
+                endDate : '',
+                devices : [],
+                layers : {}
+            }
+			$('#run-button').attr('disabled','true');
+			switch (activeTabIndex) {
+				case 0 : 
+					callService('QueryCounters', { queryObject : JSON.stringify(query)} , function(result) {
+						$('#run-button').removeAttr('disabled');
+						$('#result-json').html(JSON.stringify(result));
+						$('#result-formatted').html(json2html(result));
+					})
+					break;
+				case 1 :
+					query.FillMode = 0;
+					if ($('#fill-mode-attributes').prop('checked'))
+						query.FillMode |= 1;
+					if ($('#fill-mode-attachments').prop('checked'))
+						query.FillMode |= 2;
+					if ($('#fill-mode-geometry').prop('checked'))
+						query.FillMode |= 16;
+					callService('Query', { queryObject : JSON.stringify(query)}, function(result) {
+						$('#run-button').removeAttr('disabled');
+						$('#result-json').html(JSON.stringify(result));
+						$('#result-formatted').html(json2html(result));					
+					});
+					break;
+				case 2 :
+					var recordID = guid();
+					var entry = {
+						record : {
+							id : recordID,
+							start_time : (new Date()).getTime(),
+							end_time : (new Date()).getTime(),
+							layer_id : '01DECED-2BFA-4492-8BCB-845C435AB104',
+							geometry : 'POINT (32.754884 39.908413199999956)',
+							sync_flag : 0,
+							parent_record_id : 'null',
+							uuid : 'null',
+							macro : 'null',
+						},
+						attachments : [],
+						attributes : [
+							{
+								id : guid(),
+								name : '20e365cb-1548-4f3a-93d7-5ce04241001b',
+								value : 'API Test',
+								record_id : recordID
+							}						
+						]		
+					}
+					callService('EditMobidiEntry',{ entry : JSON.stringify(entry)}, function(result) {
+						$('#run-button').removeAttr('disabled');
+						$('#result-json').html(JSON.stringify(result));
+						$('#result-formatted').html(json2html(result));
+					});
+					break;
+			}
+		}
+		
+		$('#main-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+			$('#result-formatted').html('');
+			$('#result-json').html('');
+		
+			if (e.target.id == 'nav-query-records-tab')
+				$('#fill-mode-container').show();
+			else
+				$('#fill-mode-container').hide();
+		})
+    </script>
+</body>
+
+</html>
