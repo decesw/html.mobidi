@@ -26,6 +26,9 @@
 		#result-container {
 			display:none;
 		}
+		#create-record-params-container {
+			display:none;
+		}
 	
 	</style>
 	<script>
@@ -50,7 +53,7 @@
 		  <div class="nav nav-tabs" id="nav-tab" role="tablist">
 			<a class="nav-item nav-link active" id="nav-query-record-counts-tab" data-toggle="tab" href="#nav-query-record-counts" role="tab" aria-controls="nav-query-record-counts" aria-selected="true">Query Record Counts</a>
 			<a class="nav-item nav-link" id="nav-query-records-tab" data-toggle="tab" href="#nav-query-records" role="tab" aria-controls="nav-query-records" aria-selected="false">Query Records</a>
-			<a class="nav-item nav-link" id="nav-create-record-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Create Record</a>
+			<a class="nav-item nav-link" id="nav-create-record-tab" data-toggle="tab" href="#nav-create-record" role="tab" aria-controls="nav-create-record" aria-selected="false">Create Record</a>
 		  </div>
 		</nav>
 		<div class="tab-content">
@@ -65,9 +68,13 @@
 			<p>By default this service returns limited properties of the record for performance reasons.</p>
 			<p>You may set FillMode property according to required details. <a href="https://servis2.dece.com.tr/DeceSystemInfoWebHandler?op=ObjectInfo&Name=Mobidi.Cloud.Intefaces.MobidiQueryFillMode,%20Mobidi.Cloud&PropEx=FillMode&loginWithGuest=1" target="blank">Click</a> for other FillMode options.</p>
 		  </div>
-		  <div class="tab-pane fade" id="nav-create-record" role="tabpanel" aria-labelledby="nav-create-record-tab">...</div>
+		  <div class="tab-pane fade" id="nav-create-record" role="tabpanel" aria-labelledby="nav-create-record-tab">
+				<br/>
+				<p>This example demonstrates how to create or update a Mobidi record. If record id exists in Mobidi Office, it will be updated, otherwise a new record will be created.</p>
+				<p>In this example one one element/attribute value is defined. "attributes" property is array type, so you may add as much attribute as you have.</p>
+				<p><a href="https://servis2.dece.com.tr/DeceSystemInfoWebHandler?op=ObjectInfo&Name=Mobidi.Cloud.MobidiEntry,%20Mobidi.Cloud&PropEx=" target="blank">Click</a> for other MobidiEntry object properties.</p>
+		  </div>
 		</div>
-		<hr/>
 		<div class="card">
 			<div class="card-body">
 				<form id="mainForm" class="needs-validation" novalidate>
@@ -75,7 +82,7 @@
 						<label for="txtServerURL">Mobidi Office URL</label>
 						<input type="text" class="form-control" id="txtServerURL" aria-describedby="serverURLHelp" required>
 						<div class="invalid-feedback">
-						  Please write Mobidi Office URL.
+						  Please enter Mobidi Office URL.
 						</div>
 						<small id="serverURLHelp" class="form-text text-muted">Enter root URL of Mobidi Office (ex:http://mobidi.yourcompany.com, http://69.89.31.226)</small>
 					</div>
@@ -83,10 +90,10 @@
 						<label for="txtToken">Token</label>
 						<input type="text" class="form-control" id="txtToken" aria-describedby="tokenHelp" required>
 						<div class="invalid-feedback">
-						  Please write Mobidi Office Token.
+						  Please enter Mobidi Office Token.
 						</div>
 						<small id="tokenHelp" class="form-text text-muted">You need to have a token to use Mobidi Office API's. System Manager can generate a token.</small>
-					</div>					
+					</div>
 					<div id="fill-mode-container" class="form-group">
 						<label class="form-check-label" for="fill-mode-card">Fill Mode</label>
 						<div class="card">
@@ -105,7 +112,25 @@
 								</div>
 							</div>
 						</div>
-					</div>					
+					</div>
+					<div id="create-record-params-container">
+						<div class="form-group">
+							<label for="layer-id">Layer ID</label>
+							<input type="text" class="form-control" id="layer-id" aria-describedby="tokenHelp">
+							<div class="invalid-feedback">
+							  Please enter Layer ID.
+							</div>
+							<small id="tokenHelp" class="form-text text-muted">You need to enter ID of new record's layer. Use Element Details report (Mobidi Office > Query > Reports > Element Details) to get layer IDs (Code column of the table).</small>
+						</div>	
+						<div class="form-group">
+							<label for="element-name">Element Name</label>
+							<input type="text" class="form-control" id="element-name" aria-describedby="tokenHelp">
+							<div class="invalid-feedback">
+							  Please enter Element Name.
+							</div>
+							<small id="tokenHelp" class="form-text text-muted">Elements have ID and Name which are both GUID's. An element has a unique Name and it is same for all records. ID is different for each record. Use Element Details report (Mobidi Office > Query > Reports > Element Details) to get layer names (Code column of the table).</small>
+						</div>	
+					</div>
 					<button type="button" id="run-button" class="btn btn-primary" onclick="run()">Run</button>
 				</form>
 				<br/>
@@ -169,18 +194,18 @@
 			$('#result-json').html('');				
 			$('#result-container').show();
 			var activeTabIndex = $('#main-tabs .nav-item').index($('#main-tabs .nav-item.active'));
-            var query = {
-                recordID : '',
-                startIndex : 0,
-                endIndex : 10,
-                startDate : '',
-                endDate : '',
-                devices : [],
-                layers : {}
-            }
 			$('#run-button').attr('disabled','true');
 			switch (activeTabIndex) {
 				case 0 : 
+					var query = {
+						recordID : '',
+						startIndex : 0,
+						endIndex : 10,
+						startDate : '',
+						endDate : '',
+						devices : [],
+						layers : {}
+					}
 					callService('QueryCounters', { queryObject : JSON.stringify(query)} , function(result) {
 						$('#run-button').removeAttr('disabled');
 						$('#result-json').html(JSON.stringify(result));
@@ -188,6 +213,15 @@
 					})
 					break;
 				case 1 :
+					var query = {
+						recordID : '',
+						startIndex : 0,
+						endIndex : 10,
+						startDate : '',
+						endDate : '',
+						devices : [],
+						layers : {}
+					}
 					query.FillMode = 0;
 					if ($('#fill-mode-attributes').prop('checked'))
 						query.FillMode |= 1;
@@ -208,8 +242,8 @@
 							id : recordID,
 							start_time : (new Date()).getTime(),
 							end_time : (new Date()).getTime(),
-							layer_id : '01DECED-2BFA-4492-8BCB-845C435AB104',
-							geometry : 'POINT (32.754884 39.908413199999956)',
+							layer_id : $('#layer-id').val(),
+							geometry : 'POINT (32.754849, 39.908217)',
 							sync_flag : 0,
 							parent_record_id : 'null',
 							uuid : 'null',
@@ -219,7 +253,7 @@
 						attributes : [
 							{
 								id : guid(),
-								name : '20e365cb-1548-4f3a-93d7-5ce04241001b',
+								name : $('#element-name').val(),
 								value : 'API Test',
 								record_id : recordID
 							}						
@@ -242,6 +276,16 @@
 				$('#fill-mode-container').show();
 			else
 				$('#fill-mode-container').hide();
+
+			if (e.target.id == 'nav-create-record-tab') {
+				$('#create-record-params-container').show();
+				$('#create-record-params-container input').attr('required','true');
+			}
+			else {
+				$('#create-record-params-container').hide();
+				$('#create-record-params-container input').removeAttr('required');
+			}
+			
 		})
     </script>
 </body>
