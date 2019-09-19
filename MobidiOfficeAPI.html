@@ -180,8 +180,11 @@
 				dataType : 'json',
 				data: postData
 			})
-			.done(function( result ) {
+			.done(function(result) {
 				callBackFunction(result);
+			})
+			.fail(function(result){
+				callBackFunction({error:result});
 			});
         };
 		function run() {
@@ -243,7 +246,7 @@
 							start_time : (new Date()).getTime(),
 							end_time : (new Date()).getTime(),
 							layer_id : $('#layer-id').val(),
-							geometry : 'POINT (32.754849, 39.908217)',
+							geometry : 'POINT (32.754849 39.908217)',
 							sync_flag : 0,
 							parent_record_id : 'null',
 							uuid : 'null',
